@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Skladový systém</title>
+	<link rel="shortcut icon" href="../static/Components/assets/head_icon.png" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.20.0/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.min.js"></script>    
+
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/novaInventura.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+</head>
+<body>
+	
+	<div id="app">
+
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+    <script src="{{ url_for('static', filename='js/sklady/Modal.js') }}" type="text/babel"></script>
+	<script src="{{ url_for('static', filename='js/sklady/opravitInventura.js') }}" type="text/babel"></script>
+	<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</body>
+</html>

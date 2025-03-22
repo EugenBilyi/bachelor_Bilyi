@@ -1,0 +1,180 @@
+:root {
+    --header-height: 50px;
+    --rowHeight: 45px;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    list-style: none;
+    text-decoration: none;
+}
+
+
+body{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(226, 225, 224);
+}
+
+header{
+    height: var(--header-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(67, 38, 38, 0.706);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4%;
+    box-shadow: 0 5px 10px #000;
+    z-index: 1000;
+}
+
+header div{
+    display: flex;
+}
+
+header img{
+    height: 30px;
+    width: 30px;
+    margin-right: 10px;
+    user-select: none;
+}
+
+header h2{
+    color: rgba(255, 255, 255, 0.95);
+    cursor: default;
+}
+
+/* Контейнер с колонками */
+.columns-container {
+    position: fixed;
+    top: calc(var(--header-height) + 15px);
+    left: 2%;
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px; /* Расстояние между колонками */
+    width: 100%; /* Контейнер на всю ширину экрана */
+}
+
+.columns-container input{
+    padding-left: 4px;
+}
+
+.columns-container p{
+    margin-top: 10px;
+}
+
+.columns-container input, .columns-container select{
+    margin-top: 10px;
+    margin-bottom: 30px;
+    width: 95%;
+    height: 40px;
+    font-size: 17px;
+    padding-left: 6px;
+    border: 1px solid gray;
+    border-radius: 6px;
+}
+
+
+/* Стили для колонок */
+.column {
+    flex: 1;
+    max-width: 45%;
+}
+.column:first-child, .column:nth-child(2){
+    margin-top: 15px;
+}
+.column:nth-child(2){
+    margin-right: 2.5%;
+}
+
+.selectUnit, .selectCategory{
+    margin-bottom: 0px !important;
+}
+
+.newUnit{
+    margin-top: 10px;
+    display: flex;
+    max-width: 95%;
+}
+
+.newUnit span{
+    height: 50px;
+    padding-top: 7px;
+    margin-right: 7px;
+    text-align: center;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 3px;
+    background: rgba(67, 38, 38, 0.706);
+}
+
+.priceBlock{
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    width: 100%;
+}
+
+.priceInput{
+    flex: 1;
+    max-width: 48%;
+}
+
+.blockInput{
+    position: relative;
+    display: flex;
+    /* height: 100%; */
+}
+
+.blockInput span{
+    position: absolute;
+    right: 18px;
+    top: 19px;
+    pointer-events: none;
+    font-size: 17px;
+    padding-left: 2px;
+} 
+
+.blockInput input{
+    cursor: text;
+}
+
+footer {
+    height: var(--header-height); 
+    position: fixed; 
+    bottom: 0; 
+    left: 0;
+    right: 0;
+    background: rgba(67, 38, 38, 0.706); 
+    display: flex; 
+    justify-content: space-between;
+    align-items: center; 
+    padding: 0 4%;
+    color: white;
+    box-shadow: 0 -1px 10px #000;
+    z-index: 1000; 
+}
+
+footer i{
+    padding-right: 5px;
+}
+
+.acceptButton{
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(67, 38, 38, 0.706);
+}
+
+.closeButton:hover, .acceptButton:hover{
+    cursor: pointer;
+}

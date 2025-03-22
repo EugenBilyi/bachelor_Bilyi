@@ -1,0 +1,473 @@
+:root {
+    --header-height: 60px;
+    --sideBar-width: 20%;
+    --rowHeight: 45px;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    list-style: none;
+    text-decoration: none;
+}
+
+
+body{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(226, 224, 224);
+}
+
+i{
+    padding: 2px;
+}
+
+header{
+    height: var(--header-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(67, 38, 38, 0.706);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8%;
+    box-shadow: 0 5px 10px #000;
+    z-index: 1000;
+}
+
+header .logo{
+    font-size: 23.5px;
+    font-weight: 900;
+    color: #fff;
+    transition: .5s;
+}
+
+header .logo:hover{
+    transform: scale(1.2);
+}
+
+header nav ul li {
+    position: relative;
+    float: left;
+}
+
+header nav ul li a {
+    padding: 19px;
+    color: #fff;
+    font-size: 17.5px;
+    display: block;
+}
+
+header nav ul li a:hover{
+    background: rgba(67, 38, 38, 1);
+    color: #fff;
+}
+
+nav ul li ul{
+    position: absolute;
+    left: 0;
+    width: 180px;
+    background: #fff;
+    display: none;
+}
+
+nav ul li ul li{
+    width: 100%;
+    border: 1px solid rgba(0,0,0,.1);
+}
+
+nav ul li:hover > ul{
+    display: initial;
+    background: rgba(67, 38, 38, 0.706);
+}
+
+.sklady{
+    background: rgba(67, 38, 38, 0.8);
+}
+.skladove_karty{
+    background: rgba(67, 38, 38, 0.8);
+}
+
+.sideBar {
+    position: fixed;
+    top: calc(var(--header-height) + 15px);
+    left: 0.5%;
+    width: var(--sideBar-width);
+    height: auto;
+    background: #fefefe;
+    padding-top: 8px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sideBar ul li {
+    padding: 0;
+    height: 6vh;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    margin-bottom: 3px;
+    transition: .5s;
+}
+
+.sideBar ul li:hover{
+    cursor: pointer;
+    transform: scale(1.04);
+}
+
+.sideBar ul li a{
+    text-decoration: none;
+    color: rgba(67, 38, 38, 1);
+    font-size: 22px;
+    font-weight: 500;
+    
+}
+
+.current{
+    background: rgba(67, 38, 38, 0.706);
+}
+
+.sideBar ul li.current a{
+    color: #fff;
+}
+
+.pageName{
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: calc(var(--header-height) + 15px);
+    left: calc(var(--sideBar-width) + 20px);
+    height: var(--header-height);
+    width: calc(100% - (var(--sideBar-width) + 0.5% + 20px));
+    background: #fefefe;
+    z-index: 10;
+}
+
+.pageName div{
+    display: flex;
+    align-items: center;
+    padding-left: 3%;
+    width: 100%;
+}
+
+.pageName i{
+    font-size: 23px;
+    font-weight: bold;
+    color: rgba(67, 38, 38, 1);
+    cursor: pointer;
+}
+
+.pageName p{
+    font-size: 23px;
+    font-weight: 600;
+    padding-left: 1%;
+    color: rgba(67, 38, 38, 1);
+    z-index: 10;
+}
+
+.pageName p:hover{
+    cursor: default;
+}
+
+.mainPlace{
+    position: fixed;
+    top: calc(var(--header-height)*2 + 20px + 10px);
+    left: calc(var(--sideBar-width) + 20px);
+    width: calc(100% - (var(--sideBar-width) + 0.5% + 20px));
+    /* height: calc(100% - (var(--header-height)*2 + 40px)); */
+    padding: 15px;
+    padding-bottom: 50px;
+    height: 80%;
+    background: #fefefe;
+    overflow-y: auto;
+}
+
+
+.formContainer {
+    width: 95%;
+    margin: 20px auto;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    /* padding: 2%; */
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.mainPlace p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.inputField {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.inputFieldDate {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.buttonGroup {
+    display: flex;
+    align-items: center; 
+    gap: 10px;
+}
+
+.btn {
+    background: #888;
+    border: none;
+    padding: 8px 12px;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background: #555;
+}
+
+.categoriesButton{
+    padding: 8px;
+    border-radius: 6px;
+    background: #888;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; 
+    color: white;
+}
+
+.categoriesButton:hover{
+    cursor: pointer;
+}
+
+.category {
+    cursor: pointer;
+    background: #f0f0f0;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow-y: auto;
+    table-layout: fixed;
+}
+
+.items-table th, .items-table td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: left;
+    width: 25%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.items-table th {
+    background: #f4f4f4;
+}
+
+.input-mnozstvo {
+    width: 60px;
+}
+
+.items-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 1s ease-in-out;
+}
+
+.items-container.open {
+    max-height: 500px; 
+    overflow-y: auto;
+}
+
+tbody span{
+    padding-left: 8px;
+}
+
+.bottomBlock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: #fefefe;
+}
+
+.bottomBlock button {
+    width: 30%;
+    font-size: 16px;
+    background: rgba(67, 38, 38, 0.706);
+    color: #fff;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.bottomBlock button:hover {
+    background: rgba(67, 38, 38, 1);
+    cursor: pointer;
+}
+
+.totalPrice {
+    text-align: right;
+}
+
+.totalPrice span {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid lightgray;
+    border-top: 5px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+
+.infoTable {
+    width: 100%;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+}
+
+.infoTable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.infoTable th, .infoTable td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.infoTable th {
+    background: rgba(67, 38, 38, 0.8);
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+}
+
+.infoTable td {
+    text-align: center;
+}
+
+.categoryTitle {
+    margin-top: 20px;
+    font-size: 22px;
+    padding: 30px 0 10px 0;
+    font-weight: bold;
+    color: rgba(67, 38, 38, 0.9);
+    padding-left: 10px;
+}
+
+.categoryTable {
+    margin-top: 15px;
+    margin-bottom: 40px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.categoryTable h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: rgba(67, 38, 38, 0.9);
+    padding-left: 10px;
+    border-bottom: 2px solid rgba(67, 38, 38, 0.9);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.categoryTable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.categoryTable th, .categoryTable td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.categoryTable th {
+    background: rgba(67, 38, 38, 0.9);
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+}
+
+.categoryTable td {
+    text-align: center;
+}
+
+.categoryTable tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.categoryTable tr:hover {
+    background: rgba(67, 38, 38, 0.1);
+}
+
+.negative {
+    color: red;
+    font-weight: bold;
+}
+
+.positive {
+    color: green;
+    font-weight: bold;
+}

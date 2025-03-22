@@ -1,0 +1,347 @@
+:root {
+    --header-height: 60px;
+    --sideBar-width: 20%;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    list-style: none;
+    text-decoration: none;
+}
+
+
+body{
+    height: 100vh;
+    background-color: rgb(226, 224, 224);
+}
+
+header{
+    height: var(--header-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(67, 38, 38, 0.706);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8%;
+    box-shadow: 0 5px 10px #000;
+    z-index: 1000;
+}
+
+header .logo{
+    font-size: 23.5px;
+    font-weight: 900;
+    color: #fff;
+    transition: .5s;
+}
+
+header .logo:hover{
+    transform: scale(1.2);
+}
+
+header nav ul li {
+    position: relative;
+    float: left;
+}
+
+header nav ul li a {
+    padding: 19px;
+    color: #fff;
+    font-size: 17.5px;
+    display: block;
+}
+
+header nav ul li a:hover{
+    background: #fff;
+    background: rgba(67, 38, 38, 1);
+}
+
+nav ul li ul{
+    position: absolute;
+    left: 0;
+    width: 180px;
+    background: #fff;
+    display: none;
+}
+
+nav ul li ul li{
+    width: 100%;
+    border: 1px solid rgba(0,0,0,.1);
+}
+
+nav ul li:hover > ul{
+    display: initial;
+    background: rgba(67, 38, 38, 0.706);
+}
+
+.sklady{
+    background: rgba(67, 38, 38, 0.8);
+}
+.categories{
+    background: rgba(67, 38, 38, 0.8);
+}
+
+.sideBar {
+    position: fixed;
+    top: calc(var(--header-height) + 15px);
+    left: 0.5%;
+    width: var(--sideBar-width);
+    height: auto;
+    background: #fefefe;
+    padding-top: 8px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sideBar ul li {
+    padding: 0;
+    height: 6vh;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    margin-bottom: 3px;
+    transition: .5s;
+}
+
+.sideBar ul li:hover{
+    cursor: pointer;
+    transform: scale(1.04);
+}
+
+.sideBar ul li a{
+    text-decoration: none;
+    color: rgba(67, 38, 38, 1);
+    font-size: 22px;
+    font-weight: 500;
+    width: 100%;
+    
+}
+
+.current{
+    background: rgba(67, 38, 38, 0.706);
+}
+
+.sideBar ul li.current a{
+    color: #fff;
+}
+
+.pageName{
+    padding: 0;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    top: calc(var(--header-height) + 15px);
+    left: calc(var(--sideBar-width) + 20px);
+    height: var(--header-height);
+    width: calc(100% - (var(--sideBar-width) + 0.5% + 20px));
+    background: #fefefe;
+    z-index: 10;
+}
+
+.pageName p{
+    font-size: 23px;
+    font-weight: 600;
+    padding-left: 3%;
+    color: rgba(67, 38, 38, 1);
+    z-index: 10;
+}
+
+.pageName p:hover{
+    cursor: default;
+}
+
+.mainPlace{
+    position: fixed;
+    top: calc(var(--header-height)*2 + 20px + 10px);
+    left: calc(var(--sideBar-width) + 20px);
+    width: calc(100% - (var(--sideBar-width) + 0.5% + 20px));
+    height: calc(100% - (var(--header-height)*2 + 40px));
+    background: #fefefe;
+    overflow-y: auto;
+}
+
+.newCategory{
+    padding: 2% 0 2% 2%;
+    display: flex;
+    font-size: 17px;
+    align-items: center;
+}
+
+.newCategory input{
+    margin: 0 5px 0 5px;
+    padding-left: 5px;
+    height: 5vh;
+}
+
+.newCategory button{
+    width: auto;
+    height: 5vh;
+    font-size: 15px;
+    padding: 0 10px 0 10px;
+}
+
+.newCategory button:hover{
+    cursor: pointer;
+}
+
+.tableCategories{
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.tableCategories ul{
+    border: 1px solid gray;
+}
+
+.tableCategories ul li{
+    border-bottom: 1px solid gray;
+}
+
+.tableCategories ul li:first-child{
+    background: #f4f4f4;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 1%;
+}
+
+.tableCategories ul li button{
+    color: rgba(67, 38, 38, 1);
+    font-size: 14px;
+    font-weight: 600;
+    border: 2px solid rgba(67, 38, 38, 1);
+    padding: 3px;
+}
+
+.tableCategories ul li button:hover{
+    cursor: pointer;
+}
+
+.tableCategories ul li:nth-child(2){
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.tableCategories ul li span {
+    display: flex; /* Для равной высоты */
+    align-items: center;
+    height: 100%;
+}
+
+.tableCategories ul li span:first-child {
+    border-right: 1px solid gray;
+    padding-left: 10px;
+    width: 93% !important;
+}
+
+.tableCategories ul li span p{
+    color: rgba(67, 18, 18, 1);
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 3px;
+    user-select: none;
+}
+
+.tableCategories ul li:nth-child(2) span:nth-child(2){
+    width: 7%;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.tableCategories ul li:nth-child(3){
+    height: 45px;
+    display: flex;
+    align-items: center;
+}
+
+.tableCategories ul li:nth-child(3) span:nth-child(2){
+    width: 7%;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 500;
+    color: #fff;
+    user-select: none;
+}
+
+.tableCategories ul li input{
+    width: 95%;
+    height: 70%;
+}
+
+.searchContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%; 
+    height: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    height: 100%;
+    padding-left: 40px;
+    box-sizing: border-box;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 10px;
+    font-size: 18px;
+}
+
+.tableBlock{
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%; 
+    height: 45px;
+}
+
+.tableBlock span:nth-child(2){
+    width: 7%;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.tableBlock:nth-child(odd){
+    background-color: #fff;
+}
+
+.tableBlock:nth-child(even){
+    background-color: #f4f4f4;
+}
+
+.headerUl{
+    margin-bottom: 10px;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid lightgray;
+    border-top: 5px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}

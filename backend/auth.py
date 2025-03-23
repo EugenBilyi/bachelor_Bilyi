@@ -23,7 +23,7 @@ def authorize_user(email, password):
 
     create_tables(table_name)
 
-    conn.commit
+    conn.commit()
     cursor.close()
     conn.close()
     return {"success": True}

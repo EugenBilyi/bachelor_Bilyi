@@ -496,7 +496,7 @@ def create_tables(table_name):
         );
         """
     )
-
+    
     conn.commit()
 
     create_triggers_and_functions(table_name)

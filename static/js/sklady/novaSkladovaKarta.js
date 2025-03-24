@@ -28,7 +28,7 @@ function App() {
             }
         }
 
-        fetch('http://127.0.0.1:5000/items', {
+        fetch('/items', {
             headers: {
                 'Authorization': `Bearer ${user?.email || ''}`
             }
@@ -58,7 +58,7 @@ function App() {
             return;
         }
 
-        fetch('http://127.0.0.1:5000/categories_api', {
+        fetch('/categories_api', {
             headers: {
                 'Authorization': `Bearer ${user.email}`
             }
@@ -149,7 +149,7 @@ function App() {
         };
 
         // Отправка данных на сервер
-        fetch('http://127.0.0.1:5000/new_item', {
+        fetch('/new_item', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

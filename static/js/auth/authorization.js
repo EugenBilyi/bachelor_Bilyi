@@ -10,7 +10,7 @@ function App() {
         const email = form.elements.email.value;
         const password = form.elements.password.value;
     
-        fetch('http://127.0.0.1:5000/authorize', {
+        fetch('/authorize', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

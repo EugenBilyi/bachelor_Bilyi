@@ -1,4 +1,4 @@
-const socket = io("http://127.0.0.1:5000"); // Подключение к WebSocket
+const socket = io(); // Подключение к WebSocket
 
 const { useEffect, useState } = React;
 
@@ -99,7 +99,7 @@ function App() {
     
         const fetchData = async () => {
             try {
-                const data = await fetchWithRetry('http://127.0.0.1:5000/items');
+                const data = await fetchWithRetry('/items');
                 if (isMounted) {
                     setItems(data);
                 }
@@ -237,7 +237,7 @@ function App() {
             return;
         }
     
-        fetch('http://127.0.0.1:5000/delete_item', {
+        fetch('/delete_item', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

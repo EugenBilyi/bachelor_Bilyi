@@ -88,7 +88,7 @@ function App(){
                     throw new Error("Používateľ nie je prihlásený.");
                 }
     
-                const data = await fetchWithRetry('http://127.0.0.1:5000/naskladnenie_api', 3);
+                const data = await fetchWithRetry('/naskladnenie_api', 3);
     
                 if (isMounted) {
                     setItems(data);

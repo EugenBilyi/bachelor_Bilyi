@@ -59,7 +59,7 @@ function App() {
                     throw new Error("Používateľ nie je prihlásený.");
                 }
     
-                const categoriesData = await fetchWithRetry('http://127.0.0.1:5000/categories_api', 3);
+                const categoriesData = await fetchWithRetry('/categories_api', 3);
     
                 if (isMounted) {
                     setItems(categoriesData);

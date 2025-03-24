@@ -57,8 +57,8 @@ function App() {
                 const productNameParam = urlParams.get('product_name');
     
                 const [categoriesData, itemsData] = await Promise.all([
-                    fetchWithRetry('http://127.0.0.1:5000/categories_api'),
-                    fetchWithRetry('http://127.0.0.1:5000/items')
+                    fetchWithRetry('/categories_api'),
+                    fetchWithRetry('/items')
                 ]);
     
                 if (isMounted) {
@@ -69,7 +69,7 @@ function App() {
                 }
     
                 if (productNameParam) {
-                    const itemData = await fetchWithRetry(`http://127.0.0.1:5000/item?product_name=${encodeURIComponent(productNameParam)}`);
+                    const itemData = await fetchWithRetry(`/item?product_name=${encodeURIComponent(productNameParam)}`);
     
                     if (isMounted) {
                         if (itemData.error) {
@@ -141,16 +141,13 @@ function App() {
             DPH: dphRate
         };
     
-        console.log("Отправляемые данные:", data);
-    
-        fetch('http://127.0.0.1:5000/update_item', {
+        fetch('/update_item', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(result => {
-            console.log("Ответ сервера:", result);
             if (result.success) {
                 alert("Skladová karta bola úspešne aktualizovaná.");
                 window.close();

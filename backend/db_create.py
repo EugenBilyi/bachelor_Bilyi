@@ -497,6 +497,8 @@ def create_tables(table_name):
         """
     )
 
+    conn.commit()
+
     create_triggers_and_functions(table_name)
 
     kategorie_table_name = table_name+'_kategorie_skladovych_kariet'
@@ -543,6 +545,7 @@ def create_tables(table_name):
         """
     )
 
+    conn.commit()
 
     create_category_update_trigger(table_name)    
     create_skladove_karty(table_name)

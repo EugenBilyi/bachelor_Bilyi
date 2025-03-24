@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template, session, Response
 from flask_session import Session
-from db import get_db_connection
-from auth import authorize_user, register_user
+from backend.db import get_db_connection
+from backend.auth import authorize_user, register_user
 from io import StringIO
 import csv
 import os

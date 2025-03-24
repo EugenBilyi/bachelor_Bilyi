@@ -1,4 +1,4 @@
-from db import get_db_connection
+from backend.db import get_db_connection
 
 def create_skladove_karty(table_name):
     conn = get_db_connection()

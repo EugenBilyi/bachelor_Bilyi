@@ -1,6 +1,6 @@
 # from flask import jsonify
-from db import get_db_connection
-from db_create import create_tables
+from backend.db import get_db_connection
+from backend.db_create import create_tables
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 

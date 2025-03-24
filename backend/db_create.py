@@ -1,5 +1,5 @@
-from db import get_db_connection
-from categories import create_skladove_karty
+from backend.db import get_db_connection
+from backend.categories import create_skladove_karty
 
 def create_triggers_and_functions(table_name):
     conn = get_db_connection()

@@ -3,6 +3,7 @@ from flask_session import Session
 from backend.db import get_db_connection
 from backend.auth import authorize_user, register_user
 from io import StringIO
+from werkzeug.utils import secure_filename
 import csv
 import os
 import hashlib
@@ -11,6 +12,9 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
 socketio = SocketIO(app, cors_allowed_origins="*")  # Поддержка WebSocket
+
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB
+ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png', 'image/gif'}
 
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
 app.config['SESSION_TYPE'] = 'filesystem'  # Хранение сессий на диске
@@ -73,6 +77,10 @@ def opravitInventura():
 @app.route('/infoInventura')
 def infoInventura():
     return render_template('infoInventura.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -1131,3 +1139,287 @@ def export_categories_csv():
     response = Response(output.getvalue(), mimetype='text/csv')
     response.headers['Content-Disposition'] = 'attachment; filename=categories.csv'
     return response
+
+@app.route('/api/profile_data')
+def get_profile_data():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    email = user.get('email')
+
+    if not table_name or not email:
+        return jsonify({'success': False, 'error': 'Invalid session'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        SELECT first_name, last_name, username, avatar_path, email
+        FROM {table_name}_profile
+        WHERE email = %s
+    """, (email,))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if row:
+        return jsonify({'success': True, 'profile': {
+            'first_name': row[0],
+            'last_name': row[1],
+            'username': row[2],
+            'avatar_path': row[3],
+            'email': row[4]
+        }})
+    else:
+        return jsonify({'success': False, 'error': 'Profile not found'}), 404
+    
+
+@app.route('/api/upload_avatar', methods=['POST'])
+def upload_avatar():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    email = user.get('email')
+    if not table_name or not email:
+        return jsonify({'success': False, 'error': 'Invalid session'}), 400
+
+    if 'avatar' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+
+    file = request.files['avatar']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'Empty filename'}), 400
+    
+    if file.mimetype not in ALLOWED_MIME_TYPES:
+        return jsonify({'success': False, 'error': 'Nepodporovaný formát obrázka (povolené: JPG, PNG, GIF)'}), 400
+
+    filename = secure_filename(f"{table_name}.jpg")
+    save_path = os.path.join("static", "Components", "avatars", filename)
+
+    try:
+        file.save(save_path)
+
+        avatar_url = f"/static/Components/avatars/{filename}"
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"""
+            UPDATE {table_name}_profile
+            SET avatar_path = %s
+            WHERE email = %s
+        """, (avatar_url, email))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'avatar_path': avatar_url})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+@app.route('/api/delete_avatar', methods=['POST'])
+def delete_avatar():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    email = user.get('email')
+    if not table_name or not email:
+        return jsonify({'success': False, 'error': 'Invalid session'}), 400
+
+    filename = f"{table_name}.jpg"
+    avatar_path = os.path.join("static", "Components", "avatars", filename)
+
+    # Видаляємо файл, якщо він існує
+    if os.path.exists(avatar_path):
+        try:
+            os.remove(avatar_path)
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+    # Скидаємо шлях до дефолтного
+    default_avatar = "/static/Components/assets/empty_profile_logo.jpg"
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        UPDATE {table_name}_profile
+        SET avatar_path = %s
+        WHERE email = %s
+    """, (default_avatar, email))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': True, 'avatar_path': default_avatar})
+
+@app.route('/api/update_profile', methods=['POST'])
+def update_profile():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    email = user.get('email')
+    if not table_name or not email:
+        return jsonify({'success': False, 'error': 'Invalid session'}), 400
+
+    data = request.get_json()
+    first_name = data.get('first_name', '').strip()
+    last_name = data.get('last_name', '').strip()
+    username = data.get('username', '').strip()
+
+    if not first_name or not username:
+        return jsonify({'success': False, 'error': 'Meno a užívateľské meno sú povinné'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        UPDATE {table_name}_profile
+        SET first_name = %s, last_name = %s, username = %s
+        WHERE email = %s
+    """, (first_name, last_name, username, email))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': True})
+
+@app.route('/api/change_email', methods=['POST'])
+def change_email():
+    import re
+
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    old_email = request.json.get('old_email', '').strip()
+    new_email = request.json.get('new_email', '').strip()
+
+    old_table = user.get('table_name')
+    old_session_email = user.get('email')
+    new_table = new_email.split('@')[0]
+
+    if old_email != old_session_email:
+        return jsonify({'success': False, 'error': 'Starý email nezodpovedá aktuálnemu'}), 400
+
+    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', new_email):
+        return jsonify({'success': False, 'error': 'Neplatný email'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Перевірити, чи новий email вже існує
+    cursor.execute("SELECT 1 FROM users WHERE email = %s", (new_email,))
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'error': 'Email už existuje'}), 400
+
+    try:
+        # 1. Перейменування таблиць
+        tables = ["", "_inventury", "_inventury_polozky", "_kategorie_skladovych_kariet", "_naskladnenie", "_naskladnenie_polozky", "_profile"]
+        for suffix in tables:
+            cursor.execute(f"ALTER TABLE {old_table}{suffix} RENAME TO {new_table}{suffix};")
+
+        # 2. Оновлення users
+        cursor.execute("""
+            UPDATE users SET email = %s, table_name = %s WHERE email = %s
+        """, (new_email, new_table, old_email))
+
+        # 3. Оновлення профілю
+        cursor.execute(f"""
+            SELECT first_name, username, avatar_path FROM {new_table}_profile WHERE email = %s
+        """, (old_email,))
+        profile = cursor.fetchone()
+
+        if profile:
+            new_first = new_table if profile[0] == old_table else profile[0]
+            new_username = new_table if profile[1] == old_table else profile[1]
+            new_avatar_path = profile[2].replace(f"/{old_table}.jpg", f"/{new_table}.jpg") if profile[2] else None
+
+            cursor.execute(f"""
+                UPDATE {new_table}_profile 
+                SET email = %s, first_name = %s, username = %s, avatar_path = %s 
+                WHERE email = %s
+            """, (new_email, new_first, new_username, new_avatar_path, old_email))
+
+            # Перейменувати файл аватарки (якщо існує)
+            old_path = os.path.join("static", "Components", "avatars", f"{old_table}.jpg")
+            new_path = os.path.join("static", "Components", "avatars", f"{new_table}.jpg")
+            if os.path.exists(old_path):
+                os.rename(old_path, new_path)
+
+        conn.commit()
+
+        # Оновлюємо сесію
+        session['user']['email'] = new_email
+        session['user']['table_name'] = new_table
+
+        return jsonify({'success': True, 'message': 'Email úspešne zmenený'})
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/change_password', methods=['POST'])
+def change_password():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    email = user.get('email')
+
+    if not table_name or not email:
+        return jsonify({'success': False, 'error': 'Invalid session'}), 400
+
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+    repeat_password = data.get('repeat_password')
+
+    if not old_password or not new_password or not repeat_password:
+        return jsonify({'success': False, 'error': 'Všetky polia sú povinné'}), 400
+
+    if new_password != repeat_password:
+        return jsonify({'success': False, 'error': 'Nové heslá sa nezhodujú'}), 400
+
+    # Хешуємо старий пароль
+    h = hashlib.new("SHA256")
+    old_salted = old_password + table_name + old_password + (table_name + 'salthash')
+    h.update(old_salted.encode())
+    old_hashed = h.hexdigest()
+
+    # Перевіряємо, чи старий пароль правильний
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT password FROM users WHERE email = %s", (email,))
+    row = cursor.fetchone()
+
+    if not row or row[0] != old_hashed:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'error': 'Nesprávne staré heslo'}), 400
+
+    # Хешуємо новий пароль
+    h = hashlib.new("SHA256")
+    new_salted = new_password + table_name + new_password + (table_name + 'salthash')
+    h.update(new_salted.encode())
+    new_hashed = h.hexdigest()
+
+    # Зберігаємо новий пароль
+    cursor.execute("UPDATE users SET password = %s WHERE email = %s", (new_hashed, email))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': True, 'message': 'Heslo bolo úspešne zmenené'})

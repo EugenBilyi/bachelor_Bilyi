@@ -20,17 +20,20 @@ function App() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                localStorage.setItem('user', JSON.stringify(data.user)); // Сохраняем данные пользователя
+                localStorage.setItem('user', JSON.stringify(data.user));
                 window.location.href = '/skladove_karty';
             } else {
-                setErrorMessage('Error: ' + data.message);
+                let msg = data.message === 'Invalid credentials'
+                    ? 'Nesprávny e-mail alebo heslo.'
+                    : 'Chyba: ' + data.message;
+                setErrorMessage(msg);
             }
         })
         .catch(error => {
-            setErrorMessage('An error occurred during authorization.');
+            setErrorMessage('Počas prihlasovania došlo k chybe.');
             console.error(error);
         });
-    };
+    };    
     
 
     const handleCheckboxChange = () =>{

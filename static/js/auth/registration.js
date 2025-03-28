@@ -5,23 +5,18 @@ function App(){
 
     const handleRegister = (event) => {
         event.preventDefault();
-
         const email = event.target.elements.email.value;
         const password = event.target.elements.password.value;
         const confirmPassword = event.target.elements.confirmPassword.value;
-
-        // Проверка совпадения паролей
+    
         if (password !== confirmPassword) {
-            setErrorMessage('Passwords do not match.');
+            setErrorMessage('Heslá sa nezhodujú.');
             return;
         }
-
-        if(password.length < 8){
-            setErrorMessage('Password must contain at least 8 characters');
+        if (password.length < 8) {
+            setErrorMessage('Heslo musí obsahovať aspoň 8 znakov.');
             return;
         }
-
-        // Отправка данных на сервер для регистрации
         fetch('/register', {
             method: 'POST',
             headers: {
@@ -32,16 +27,16 @@ function App(){
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.href = '/authorization_page';  // Переход на страницу авторизации
+                window.location.href = '/authorization_page';
             } else {
-                setErrorMessage(data.message);  // Вывод сообщения об ошибке
+                setErrorMessage(data.message || 'Registrácia zlyhala.');
             }
         })
         .catch(error => {
-            setErrorMessage('An error occurred during registration.');
+            setErrorMessage('Počas registrácie došlo k chybe.');
             console.error(error);
         });
-    };
+    };    
 
     const handleCheckboxChange = () => {
         setShowPassword(!showPassword);

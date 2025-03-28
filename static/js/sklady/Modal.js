@@ -28,7 +28,7 @@ function Modal({ isOpen, onClose, searchText, onSave }) {
                 nazov: searchText,
                 kategoria: selectedCategory,
                 jednotka: selectedUnit,
-                dph: selectedDPH.replace('%', '') // Преобразуем "19%" в "19"
+                dph: selectedDPH.replace('%', '')
             })
         })
         .then(response => response.json())

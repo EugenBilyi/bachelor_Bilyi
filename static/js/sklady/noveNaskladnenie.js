@@ -1,4 +1,4 @@
-const { useState } = React;
+const { useEffect, useState } = React;
 const Modal = window.Modal;
 
 function App() {
@@ -13,6 +13,13 @@ function App() {
     const [supplier, setSupplier] = useState("");
     const [supplierSuggestions, setSupplierSuggestions] = useState([]);
     const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
+    const [profile, setProfile] = useState({
+        first_name: '',
+        last_name: '',
+        username: '',
+        email: '',
+        avatar_path: '/static/Components/assets/empty_profile_logo.jpg'
+    });
 
     useEffect(() => {
         if (supplierSuggestions.length > 0) {
@@ -21,7 +28,25 @@ function App() {
             setShowSupplierDropdown(false);
         }
     }, [supplierSuggestions]);
-      
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                const response = await fetch('/api/profile_data');
+                const data = await response.json();
+    
+                if (data.success) {
+                    setProfile(data.profile);
+                } else {
+                    console.error('Chyba pri načítaní profilu:', data.error || 'Neznáma chyba');
+                }
+            } catch (err) {
+                console.error('Chyba pri načítaní profilu:', err);
+            }
+        };
+    
+        loadProfile();
+    }, []);
 
     const getBratislavaDateTime = () => {
         const now = new Date();
@@ -282,10 +307,28 @@ function App() {
         }
     };
     
-
     const handleCreateAndRedirect = async () => {
         await handleCreateStockEntry();
         window.location.href = "/naskladnenie";
+    };
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch("/logout", {
+                method: "POST"
+            });
+            const data = await res.json();
+    
+            if (data.success) {
+                localStorage.clear();
+                window.location.href = "/authorization_page";
+            } else {
+                alert("Odhlásenie zlyhalo.");
+            }
+        } catch (err) {
+            console.error("Chyba pri odhlasovaní:", err);
+            alert("Nastala chyba pri odhlasovaní.");
+        }
     };
     
 
@@ -307,6 +350,17 @@ function App() {
                             </ul>
                         </li>
                         <li><a href="#">FAKTURÁCIE</a></li>
+                        <li className="user-menu">
+                            <a href="/profile">
+                                <img src={profile.avatar_path} alt="avatar" />
+                                <label>{profile.username}</label>
+                                <i className="fa-solid fa-caret-down"></i>
+                            </a>
+                            <ul>
+                                <li><a href="/profile">Môj profil</a></li>
+                                <li><a onClick={handleLogout}>Odhlásiť sa</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
             </header>

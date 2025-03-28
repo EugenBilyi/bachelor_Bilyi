@@ -36,7 +36,7 @@ header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 8%;
+    padding-left: 8%;
     box-shadow: 0 5px 10px #000;
     z-index: 1000;
 }
@@ -50,6 +50,18 @@ header .logo{
 
 header .logo:hover{
     transform: scale(1.2);
+}
+
+header nav ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header nav ul .user-menu {
+    margin-left: auto;
+    margin-right: 123px;
+    margin-left: 70px;
 }
 
 header nav ul li {
@@ -75,6 +87,8 @@ nav ul li ul{
     width: 180px;
     background: #fff;
     display: none;
+    top: 100%;
+    z-index: 1000;
 }
 
 nav ul li ul li{
@@ -85,6 +99,73 @@ nav ul li ul li{
 nav ul li:hover > ul{
     display: initial;
     background: rgba(67, 38, 38, 0.706);
+}
+
+/* Аватарка */
+.user-menu img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Стрілочка */
+.user-menu i.fa-caret-down {
+    margin-left: 5px;
+    font-size: 14px;
+    vertical-align: middle;
+    color: white;
+}
+
+.user-menu > a {
+    display: flex;
+    align-items: center;
+    padding: 15px 15px;
+    border-radius: 5px;
+}
+
+/* Випадаюче меню */
+.user-menu ul {
+    top: 100%;
+    left: auto;
+    width: 180px;
+    background: rgba(67, 38, 38, 0.706);
+    display: none;
+    position: absolute;
+    z-index: 1000;
+}
+
+.user-menu:hover > ul {
+    display: block;
+}
+
+.user-menu ul li {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.user-menu ul li a {
+    display: block;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.user-menu ul li a:hover {
+    background: rgba(67, 38, 38, 1);
+    color: #fff;
+}
+
+.user-menu label{
+    color: #fff;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 0 2px;
+}
+
+.user-menu ul li a{
+    cursor: pointer;
 }
 
 .sklady{
@@ -470,4 +551,26 @@ tbody span{
 .positive {
     color: green;
     font-weight: bold;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid lightgray;
+    border-top: 5px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
 }

@@ -40,7 +40,7 @@ def register_user(email, password):
         """CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             email VARCHAR(100) UNIQUE NOT NULL,
-            password VARCHAR(100) NOT NULL, -- пароли должны быть захешированы
+            password VARCHAR(100) NOT NULL, -- пароли захешированы
             table_name VARCHAR(100) NOT NULL -- имя таблицы, которую этот пользователь может видеть
         );"""
     )

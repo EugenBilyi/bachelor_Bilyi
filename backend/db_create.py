@@ -471,6 +471,54 @@ def create_inventury_tables(table_name):
     cursor.close()
     conn.close()
 
+def create_profile_table(table_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    profile_table = f"{table_name}_profile"
+
+    # 1. Створюємо таблицю профілю
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS {profile_table} (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            first_name VARCHAR(40) NOT NULL,
+            last_name VARCHAR(40),
+            username VARCHAR(40) NOT NULL,
+            avatar_path VARCHAR(100)
+        );
+    """)
+
+    # 2. Отримуємо email із таблиці users
+    cursor.execute("""
+        SELECT email FROM users WHERE table_name = %s;
+    """, (table_name,))
+    result = cursor.fetchone()
+
+    if result:
+        email = result[0]
+        first_name = table_name
+        last_name = ""
+        username = table_name
+        avatar_path = "/static/Components/assets/empty_profile_logo.jpg"
+
+        # 3. Вставка тільки якщо профіль ще не існує
+        cursor.execute(f"""
+            SELECT EXISTS (
+                SELECT 1 FROM {profile_table} WHERE email = %s
+            );
+        """, (email,))
+        exists = cursor.fetchone()[0]
+
+        if not exists:
+            cursor.execute(f"""
+                INSERT INTO {profile_table} (email, first_name, last_name, username, avatar_path)
+                VALUES (%s, %s, %s, %s, %s);
+            """, (email, first_name, last_name, username, avatar_path))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 def create_tables(table_name):
@@ -496,6 +544,8 @@ def create_tables(table_name):
         );
         """
     )
+
+    create_profile_table(table_name)
     
     conn.commit()
 

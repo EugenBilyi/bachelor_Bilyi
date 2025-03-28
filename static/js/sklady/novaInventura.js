@@ -9,6 +9,13 @@ function App() {
     const [allItems, setAllItems] = useState([]); // Храним все položky
     const [itemsByCategory, setItemsByCategory] = useState({}); // Разделяем по категориям
     const [totalDifference, setTotalDifference] = useState("0.00 €");
+    const [profile, setProfile] = useState({
+        first_name: '',
+        last_name: '',
+        username: '',
+        email: '',
+        avatar_path: '/static/Components/assets/empty_profile_logo.jpg'
+    });
 
     useEffect(() => {
         fetch('/categories_api')
@@ -25,6 +32,28 @@ function App() {
     useEffect(() => {
         calculateTotalDifference();
     }, [itemsByCategory]);
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            setIsLoading(true);
+            setError(null);
+    
+            try {
+                const data = await fetchWithRetry('/api/profile_data');
+                if (data.success) {
+                    setProfile(data.profile);
+                } else {
+                    throw new Error(data.error || 'Chyba pri načítaní profilu');
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    
+        loadProfile();
+    }, []);
     
 
     const toggleCategory = (category) => {
@@ -266,6 +295,25 @@ function App() {
         await handleCreateInventura();
         window.location.href = "/inventury";
     };
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch("/logout", {
+                method: "POST"
+            });
+            const data = await res.json();
+    
+            if (data.success) {
+                localStorage.clear();
+                window.location.href = "/authorization_page";
+            } else {
+                alert("Odhlásenie zlyhalo.");
+            }
+        } catch (err) {
+            console.error("Chyba pri odhlasovaní:", err);
+            alert("Nastala chyba pri odhlasovaní.");
+        }
+    };
     
 
     return (
@@ -285,6 +333,17 @@ function App() {
                             </ul>
                         </li>
                         <li><a href="#">FAKTURÁCIE</a></li>
+                        <li className="user-menu">
+                            <a href="/profile">
+                                <img src={profile.avatar_path} alt="avatar" />
+                                <label>{profile.username}</label>
+                                <i className="fa-solid fa-caret-down"></i>
+                            </a>
+                            <ul>
+                                <li><a href="/profile">Môj profil</a></li>
+                                <li><a onClick={handleLogout}>Odhlásiť sa</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
             </header>

@@ -1,5 +1,3 @@
-# import os
-
 DATABASE = {
     'database': 'ObsahSkladuDB',
     'user': 'postgres',
@@ -7,4 +5,3 @@ DATABASE = {
     'host': 'localhost',
     'port': '5432'
 }
-

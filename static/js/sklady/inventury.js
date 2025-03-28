@@ -31,28 +31,89 @@ function App(){
     const [sortPrice, setSortPrice] = useState(true);
     const [sortPoznamka, setSortPoznamka] = useState(true);
 
-    useEffect(() => {
-        const userData = localStorage.getItem('user');
-        let user;
-        if (userData) {
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [profile, setProfile] = useState({
+        first_name: '',
+        last_name: '',
+        username: '',
+        email: '',
+        avatar_path: '/static/Components/assets/empty_profile_logo.jpg'
+    });
+
+    const fetchWithRetry = async (url, attempts = 3) => {
+        for (let i = 0; i < attempts; i++) {
             try {
-                user = JSON.parse(userData);
-            } catch (e) {
-                console.error('Error parsing user data:', e);
-                localStorage.removeItem('user');
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                return await res.json();
+            } catch (err) {
+                console.warn(`Fetch failed (${i + 1}/${attempts}): ${url}`, err);
+                if (i === attempts - 1) throw err;
             }
         }
-        if (!user) {
-            return;
-        }
-        fetch('/inventury_api', {
-            headers: {
-                'Authorization': `Bearer ${user.email}`
+    };  
+
+    useEffect(() => {
+        let isMounted = true;
+        setIsLoading(true);
+        setError(null);
+    
+        const loadData = async () => {
+            try {
+                const userData = localStorage.getItem('user');
+                let user;
+                if (userData) {
+                    try {
+                        user = JSON.parse(userData);
+                    } catch (e) {
+                        console.error('Error parsing user data:', e);
+                        localStorage.removeItem('user');
+                    }
+                }
+    
+                if (!user) {
+                    throw new Error("Používateľ nie je prihlásený.");
+                }
+    
+                const data = await fetchWithRetry('/inventury_api', 3);
+    
+                if (isMounted) {
+                    setInventories(data);
+                }
+            } catch (err) {
+                console.error("Chyba pri načítaní údajov:", err);
+                if (isMounted) setError("Chyba pri načítaní údajov. Skúste to znova.");
+            } finally {
+                if (isMounted) setIsLoading(false);
             }
-        })
-        .then(response => response.json())
-        .then(data => setInventories(data))
-        .catch(error => console.error('Error fetching inventories:', error));
+        };
+    
+        loadData();
+    
+        return () => { isMounted = false; };
+    }, []);    
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            setIsLoading(true);
+            setError(null);
+    
+            try {
+                const data = await fetchWithRetry('/api/profile_data');
+                if (data.success) {
+                    setProfile(data.profile);
+                } else {
+                    throw new Error(data.error || 'Chyba pri načítaní profilu');
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    
+        loadProfile();
     }, []);
 
     const toggleArrowDirection = () => {
@@ -102,40 +163,6 @@ function App(){
         setInventories(sortedItems);
     };
 
-    const handleDeleteInventura = async (id) => {
-        const userData = localStorage.getItem('user');
-        const user = userData ? JSON.parse(userData) : null;
-    
-        if (!user) {
-            setErrorMessage('Unauthorized user');
-            return;
-        }
-    
-        if (!window.confirm('Naozaj chcete odstrániť toto naskladnenie?')) {
-            return;
-        }
-    
-        try {
-            const response = await fetch('/delete_naskladnenie', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.email}`
-                },
-                body: JSON.stringify({ naskladnenie_id: id })
-            });
-    
-            const result = await response.json();
-            if (result.success) {
-                setItems(items.filter(item => item.id !== id));
-            } else {
-                setErrorMessage(`Chyba pri odstraňovaní: ${result.error}`);
-            }
-        } catch (error) {
-            setErrorMessage(`Chyba pri odstraňovaní: ${error.message}`);
-        }
-    };
-
     const handleExportCSV = () => {
         if (!inventories.length) {
             setErrorMessage('Nie sú dostupné žiadne údaje na export.');
@@ -164,6 +191,43 @@ function App(){
         XLSX.writeFile(wb, 'Inventúry.xlsx');
     };
 
+    const handleLogout = async () => {
+        try {
+            const res = await fetch("/logout", {
+                method: "POST"
+            });
+            const data = await res.json();
+    
+            if (data.success) {
+                localStorage.clear();
+                window.location.href = "/authorization_page";
+            } else {
+                alert("Odhlásenie zlyhalo.");
+            }
+        } catch (err) {
+            console.error("Chyba pri odhlasovaní:", err);
+            alert("Nastala chyba pri odhlasovaní.");
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="loadingContainer">
+                <div className="spinner"></div>
+                <p>Načítanie údajov...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="errorContainer">
+                <p>{error}</p>
+                <button onClick={() => window.location.reload()}>Skúsiť znova</button>
+            </div>
+        );
+    }
+
     return(
         <div>
             <header>
@@ -181,6 +245,17 @@ function App(){
                             </ul>
                         </li>
                         <li><a href = "#">FAKTURÁCIE</a></li>
+                        <li className="user-menu">
+                            <a href="/profile">
+                                <img src={profile.avatar_path} alt="avatar" />
+                                <label>{profile.username}</label>
+                                <i className="fa-solid fa-caret-down"></i>
+                            </a>
+                            <ul>
+                                <li><a href="/profile">Môj profil</a></li>
+                                <li><a onClick={handleLogout}>Odhlásiť sa</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
             </header>

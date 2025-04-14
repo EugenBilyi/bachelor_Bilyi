@@ -107,7 +107,7 @@ function App() {
     
             const data = await res.json();
             if (data.success) {
-                const defaultAvatar = "/static/Components/assets/empty_profile_logo.jpg";
+                const defaultAvatar = "/static/Components/avatars/empty_profile_logo.jpg";
                 setProfile(prev => ({ ...prev, avatar_path: defaultAvatar }));
                 setPreviewAvatar(null);
             } else {

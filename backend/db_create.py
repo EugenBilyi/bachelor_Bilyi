@@ -520,6 +520,66 @@ def create_profile_table(table_name):
     cursor.close()
     conn.close()
 
+def create_faktury_table(table_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    faktury_table = f"{table_name}_faktury"
+
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS {faktury_table} (
+            id SERIAL PRIMARY KEY,
+            cislo VARCHAR(20),
+            datum_vystavenia TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            cena DECIMAL(8,2),
+            datum_splatnosti TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            stav VARCHAR(20) NOT NULL DEFAULT 'Nezaplatena' CHECK (stav IN ('Zaplatena', 'Nezaplatena')),
+            po_splatnosti BOOLEAN NOT NULL DEFAULT FALSE
+        );
+        """
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def create_predaj_tables(table_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    predaj_table = f"{table_name}_predaj"
+    polozky_table = f"{table_name}_predaj_polozky"
+
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS {predaj_table} (
+            id SERIAL PRIMARY KEY,
+            cislo_uctu VARCHAR(20),
+            datum TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            cena DECIMAL(8,2),
+            stol VARCHAR(10)
+        );
+        """
+    )
+
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS {polozky_table} (
+            id SERIAL PRIMARY KEY,
+            predaj_id INTEGER REFERENCES {predaj_table}(id) ON DELETE CASCADE,
+            nazov_polozky VARCHAR(50) NOT NULL,
+            pocet DECIMAL(7,2),
+            jednotkova_cena DECIMAL(7,2),
+            cena DECIMAL(7,2)
+        );
+        """
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 
 def create_tables(table_name):
     conn = get_db_connection()
@@ -600,6 +660,8 @@ def create_tables(table_name):
     create_category_update_trigger(table_name)    
     create_skladove_karty(table_name)
     create_inventury_tables(table_name)
+    create_faktury_table(table_name)
+    create_predaj_tables(table_name)
 
     conn.commit()
     cursor.close()

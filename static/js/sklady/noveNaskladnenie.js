@@ -18,7 +18,7 @@ function App() {
         last_name: '',
         username: '',
         email: '',
-        avatar_path: '/static/Components/assets/empty_profile_logo.jpg'
+        avatar_path: '/static/Components/avatars/empty_profile_logo.jpg'
     });
 
     useEffect(() => {
@@ -224,7 +224,6 @@ function App() {
     };
 
     const handleSupplierBlur = () => {
-        // Закрываем список через небольшой таймаут, чтобы успел сработать клик по пункту
         setTimeout(() => setShowSupplierDropdown(false), 200);
     };
     
@@ -232,10 +231,7 @@ function App() {
         if (supplierSuggestions.length > 0) {
             setShowSupplierDropdown(true);
         }
-    };
-    
-    
-    
+    };    
 
     const handleSelectSupplier = (selectedSupplier) => {
         setSupplier(selectedSupplier);
@@ -275,10 +271,17 @@ function App() {
                 return;
             }
     
-            // 2. Добавляем všetky položky s týmto naskladnením
+            // 2. Створюємо fakturu
+            await fetch('/api/create_faktura', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cena: cenaDPH })  // це вже строка, типу "12.50"
+            });
+
+            // 3. Добавляем všetky položky s týmto naskladnením
             await Promise.all(selectedItems.map(async (item) => {
                 const itemData = {
-                    naskladnenie_id: naskladnenie.id,  // id созданного naskladnenia
+                    naskladnenie_id: naskladnenie.id,
                     product_name: item.name,
                     DPH: item.dph + "%",
                     quantity: item.quantity,
@@ -339,7 +342,11 @@ function App() {
                 <a href="/skladove_karty" className="logo">Skladový systém</a>
                 <nav>
                     <ul>
-                        <li><a href="#">ÚČTY</a></li>
+                        <li><a href = "/uctenky">ÚČTY</a>
+                            <ul>
+                                <li><a href="/uctenky">Účtenky</a></li>
+                            </ul>
+                        </li>
                         <li className='sklady'>
                             <a href="/skladove_karty">SKLADY</a>
                             <ul>
@@ -349,7 +356,11 @@ function App() {
                                 <li><a href="/inventury">Inventúry</a></li>
                             </ul>
                         </li>
-                        <li><a href="#">FAKTURÁCIE</a></li>
+                        <li><a href = "/faktury">FAKTURÁCIE</a>
+                            <ul>
+                                <li><a href="/faktury">Faktúry</a></li>
+                            </ul>
+                        </li>
                         <li className="user-menu">
                             <a href="/profile">
                                 <img src={profile.avatar_path} alt="avatar" />
@@ -454,21 +465,21 @@ function App() {
                                                 <td>{item.dph}%</td>
                                                 <td className="inputCell">
                                                     <div className="inputWrapper">
-                                                    <input type="text" value={item.quantity}
-                                                        onChange={(e) => handleQuantityChange(index, e.target.value)}
-                                                        className="inputField inputWithUnit"
-                                                        onKeyPress={(e) => {
-                                                            if (/[0-9]/.test(e.key)) return;
-                                                            if (e.key === '.' && e.target.value.includes('.')) {
-                                                                e.preventDefault();
-                                                            } else if (e.key === '.') {
-                                                                return;
-                                                            } else {
-                                                                e.preventDefault();
-                                                            }
-                                                        }}
-                                                    />
-                                                    <span className="unitSuffix">{item.unit}</span>
+                                                        <input type="text" value={item.quantity}
+                                                            onChange={(e) => handleQuantityChange(index, e.target.value)}
+                                                            className="inputField inputWithUnit"
+                                                            onKeyPress={(e) => {
+                                                                if (/[0-9]/.test(e.key)) return;
+                                                                if (e.key === '.' && e.target.value.includes('.')) {
+                                                                    e.preventDefault();
+                                                                } else if (e.key === '.') {
+                                                                    return;
+                                                                } else {
+                                                                    e.preventDefault();
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span className="unitSuffix">{item.unit}</span>
                                                     </div>
                                                 </td>
                                                 <td className="inputCell">

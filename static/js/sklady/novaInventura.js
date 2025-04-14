@@ -14,7 +14,7 @@ function App() {
         last_name: '',
         username: '',
         email: '',
-        avatar_path: '/static/Components/assets/empty_profile_logo.jpg'
+        avatar_path: '/static/Components/avatars/empty_profile_logo.jpg'
     });
 
     useEffect(() => {
@@ -35,20 +35,17 @@ function App() {
 
     useEffect(() => {
         const loadProfile = async () => {
-            setIsLoading(true);
-            setError(null);
-    
             try {
-                const data = await fetchWithRetry('/api/profile_data');
+                const response = await fetch('/api/profile_data');
+                const data = await response.json();
+    
                 if (data.success) {
                     setProfile(data.profile);
                 } else {
-                    throw new Error(data.error || 'Chyba pri načítaní profilu');
+                    console.error('Chyba pri načítaní profilu:', data.error || 'Neznáma chyba');
                 }
             } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
+                console.error('Chyba pri načítaní profilu:', err);
             }
         };
     
@@ -322,7 +319,11 @@ function App() {
                 <a href="/skladove_karty" className="logo">Skladový systém</a>
                 <nav>
                     <ul>
-                        <li><a href="#">ÚČTY</a></li>
+                        <li><a href = "/uctenky">ÚČTY</a>
+                            <ul>
+                                <li><a href="/uctenky">Účtenky</a></li>
+                            </ul>
+                        </li>
                         <li className='sklady'>
                             <a href="/skladove_karty">SKLADY</a>
                             <ul>
@@ -332,7 +333,11 @@ function App() {
                                 <li className="current"><a href="/inventury">Inventúry</a></li>
                             </ul>
                         </li>
-                        <li><a href="#">FAKTURÁCIE</a></li>
+                        <li><a href = "/faktury">FAKTURÁCIE</a>
+                            <ul>
+                                <li><a href="/faktury">Faktúry</a></li>
+                            </ul>
+                        </li>
                         <li className="user-menu">
                             <a href="/profile">
                                 <img src={profile.avatar_path} alt="avatar" />

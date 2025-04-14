@@ -4,6 +4,8 @@ from backend.db import get_db_connection
 from backend.auth import authorize_user, register_user
 from io import StringIO
 from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
+import random
 import csv
 import os
 import hashlib
@@ -11,7 +13,7 @@ import hashlib
 from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
-socketio = SocketIO(app, cors_allowed_origins="*")  # Поддержка WebSocket
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB
 ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png', 'image/gif'}
@@ -78,9 +80,23 @@ def opravitInventura():
 def infoInventura():
     return render_template('infoInventura.html')
 
+@app.route('/faktury')
+def faktury():
+    return render_template('faktury.html')
+
 @app.route('/profile')
 def profile():
     return render_template('profile.html')
+
+@app.route('/uctenky')
+def uctenky():
+    return render_template('uctenky.html')
+
+@app.route('/infoUctenky')
+def infoUctenky():
+    return render_template('infoUctenky.html')
+
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -960,7 +976,7 @@ def get_polozka_data():
     cur = conn.cursor()
 
     query = f"""
-        SELECT product_name, DPH, unit, cenaDPH
+        SELECT product_name, DPH, unit, cenaDPH, category, quantity
         FROM {table_name} 
         WHERE LOWER(product_name) = LOWER(%s)
         LIMIT 1;
@@ -977,10 +993,10 @@ def get_polozka_data():
         'product_name': item[0],
         'dph': item[1],
         'unit': item[2],
-        'cenaDPH': float(item[3])
+        'cenaDPH': float(item[3]),
+        'category': item[4],
+        'quantity': float(item[5])
     })
-
-
 
 
 @app.route('/add_category', methods=['POST'])
@@ -1097,12 +1113,8 @@ def delete_item():
 
     return jsonify({'success': True, 'deleted_item': delete_item})
 
-
-
-
 @app.route('/export_categories_csv', methods=['GET'])
 def export_categories_csv():
-    # Проверяем авторизацию пользователя
     user = session.get('user')
     if not user:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -1111,7 +1123,6 @@ def export_categories_csv():
     if not table_name:
         return jsonify({'error': 'Invalid user'}), 400
 
-    # Подключаемся к базе данных и извлекаем данные
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -1122,14 +1133,11 @@ def export_categories_csv():
     cur.close()
     conn.close()
 
-    # Генерируем CSV-файл
     output = StringIO()
     writer = csv.writer(output, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-    # Пишем заголовки
     writer.writerow(['ID', 'Category'])
 
-    # Записываем строки данных
     for row in rows:
         writer.writerow(row)
 
@@ -1139,6 +1147,296 @@ def export_categories_csv():
     response = Response(output.getvalue(), mimetype='text/csv')
     response.headers['Content-Disposition'] = 'attachment; filename=categories.csv'
     return response
+
+@app.route('/api/create_faktura', methods=['POST'])
+def create_faktura():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Neautorizovaný prístup'}), 401
+
+    table_name = user.get('table_name')
+    if not table_name:
+        return jsonify({'success': False, 'error': 'Nesprávny názov tabuľky'}), 400
+
+    data = request.get_json()
+    cena = data.get('cena')
+
+    if cena is None:
+        return jsonify({'success': False, 'error': 'Cena je povinná'}), 400
+
+    try:
+        # Генеруємо číslo у форматі YYYY-XXXXX
+        year = datetime.now().year
+        random_number = f"{random.randint(0, 99999):05d}"
+        cislo = f"{year}-{random_number}"
+
+        # Генеруємо dátum vystavenia (відняти 1–4 дні)
+        days_back = random.randint(1, 4)
+        datum_vystavenia = datetime.now() - timedelta(days=days_back)
+
+        # Генеруємо dátum splatnosti (прибавити 7–14 днів до vystavenia)
+        days_forward = random.randint(7, 14)
+        datum_splatnosti = datum_vystavenia + timedelta(days=days_forward)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(f"""
+            INSERT INTO {table_name}_faktury (cislo, datum_vystavenia, cena, datum_splatnosti, stav)
+            VALUES (%s, %s, %s, %s, 'Nezaplatena');
+        """, (cislo, datum_vystavenia, cena, datum_splatnosti))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'cislo': cislo})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+@app.route('/api/get_faktury', methods=['GET'])
+def get_faktury():
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+
+    table_name = user.get('table_name')
+    if not table_name:
+        return jsonify([])
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        SELECT id, cislo, datum_vystavenia, cena, datum_splatnosti, stav, po_splatnosti
+        FROM {table_name}_faktury
+        ORDER BY datum_vystavenia DESC
+    """)
+    faktury = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify([
+        {
+            'id': f[0],
+            'cislo': f[1],
+            'datum_vystavenia': f[2].isoformat(),
+            'cena': float(f[3]),
+            'datum_splatnosti': f[4].isoformat(),
+            'stav': f[5],
+            'po_splatnosti': f[6]
+        } for f in faktury
+    ])
+
+@app.route('/api/update_status', methods=['POST'])
+def update_status():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Neautorizovaný prístup'}), 401
+
+    table_name = user.get('table_name')
+    if not table_name:
+        return jsonify({'success': False, 'error': 'Nesprávny názov tabuľky'}), 400
+
+    data = request.get_json()
+    faktura_id = data.get('id')
+
+    if not faktura_id:
+        return jsonify({'success': False, 'error': 'Missing faktura ID'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(f"""
+        SELECT datum_splatnosti FROM {table_name}_faktury WHERE id = %s;
+    """, (faktura_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'error': 'Faktúra neexistuje'}), 404
+
+    datum_splatnosti = row[0]
+    dnes = datetime.now()
+    po_splatnosti = datum_splatnosti < dnes
+
+    cursor.execute(f"""
+        UPDATE {table_name}_faktury
+        SET stav = 'Zaplatena', po_splatnosti = %s
+        WHERE id = %s;
+    """, (po_splatnosti, faktura_id))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': True, 'po_splatnosti': po_splatnosti})
+
+@app.route('/submit_predaj', methods=['POST'])
+def submit_predaj():
+    user = session.get('user')
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    if not table_name:
+        return jsonify({'error': 'Invalid table name'}), 400
+
+    data = request.get_json()
+    grouped_by_stol = data.get('grouped', {})
+    date_today = datetime.now().strftime("%Y%m%d")
+    prefix = table_name[:2].upper()
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(f"""
+        SELECT COUNT(*) FROM {table_name}_predaj
+        WHERE TO_CHAR(datum, 'YYYYMMDD') = %s;
+    """, (date_today,))
+    count = cur.fetchone()[0] + 1
+
+    responses = []
+
+    for stol, items in grouped_by_stol.items():
+        total_price = sum(float(row['pocet']) * float(row['cena']) for row in items)
+        cislo_uctu = f"{prefix}{date_today}{str(count).zfill(4)}"
+        count += 1
+
+        cur.execute(f"""
+            INSERT INTO {table_name}_predaj (cislo_uctu, datum, cena, stol)
+            VALUES (%s, CURRENT_TIMESTAMP, %s, %s)
+            RETURNING id;
+        """, (cislo_uctu, total_price, stol))
+        predaj_id = cur.fetchone()[0]
+
+        for row in items:
+            nazov = row['nazov']
+            pocet = float(row['pocet'])
+            jednotkova_cena = float(row['cena'])
+            cena = pocet * jednotkova_cena
+
+            # Вставка в predaj_polozky
+            cur.execute(f"""
+                INSERT INTO {table_name}_predaj_polozky 
+                (predaj_id, nazov_polozky, pocet, jednotkova_cena, cena)
+                VALUES (%s, %s, %s, %s, %s);
+            """, (predaj_id, nazov, pocet, jednotkova_cena, cena))
+
+            # Зменшення кількості в основній таблиці
+            cur.execute(f"""
+                UPDATE {table_name}
+                SET quantity = quantity - %s,
+                    sold_quantity = sold_quantity + %s
+                WHERE LOWER(product_name) = LOWER(%s);
+            """, (pocet, pocet, nazov))
+
+        responses.append({'stol': stol, 'cislo_uctu': cislo_uctu})
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({'success': True, 'predaje': responses})
+
+@app.route('/api/get_uctenky', methods=['GET'])
+def get_uctenky():
+    user = session.get('user')
+    if not user:
+        return jsonify([])
+
+    table_name = user.get('table_name')
+    if not table_name:
+        return jsonify([])
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        SELECT id, cislo_uctu, datum, cena, stol
+        FROM {table_name}_predaj
+        ORDER BY datum DESC
+    """)
+    uctenky = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify([
+        {
+            'id': row[0],
+            'cislo_uctu': row[1],
+            'datum': row[2].isoformat(),
+            'cena': float(row[3]),
+            'stol': row[4]
+        } for row in uctenky
+    ])
+
+@app.route('/api/get_predaj', methods=['GET'])
+def get_predaj():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    predaj_id = request.args.get('id')
+
+    if not table_name or not predaj_id:
+        return jsonify({'success': False, 'error': 'Invalid parameters'}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(f"""
+        SELECT cislo_uctu, datum, cena, stol
+        FROM {table_name}_predaj
+        WHERE id = %s
+    """, (predaj_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not row:
+        return jsonify({'success': False, 'error': 'Predaj not found'}), 404
+
+    return jsonify({
+        'success': True,
+        'predaj': {
+            'cislo_uctu': row[0],
+            'datum': row[1].isoformat(),
+            'cena': float(row[2]),
+            'stol': row[3]
+        }
+    })
+
+@app.route('/api/get_predaj_polozky', methods=['GET'])
+def get_predaj_polozky():
+    user = session.get('user')
+    if not user:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    table_name = user.get('table_name')
+    predaj_id = request.args.get('predaj_id')
+
+    if not table_name or not predaj_id:
+        return jsonify({'success': False, 'error': 'Invalid parameters'}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(f"""
+        SELECT nazov_polozky, pocet, jednotkova_cena, cena
+        FROM {table_name}_predaj_polozky
+        WHERE predaj_id = %s
+    """, (predaj_id,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return jsonify([
+        {
+            'nazov_polozky': row[0],
+            'pocet': float(row[1]),
+            'jednotkova_cena': float(row[2]),
+            'cena': float(row[3])
+        } for row in rows
+    ])
 
 @app.route('/api/profile_data')
 def get_profile_data():
@@ -1234,15 +1532,13 @@ def delete_avatar():
     filename = f"{table_name}.jpg"
     avatar_path = os.path.join("static", "Components", "avatars", filename)
 
-    # Видаляємо файл, якщо він існує
     if os.path.exists(avatar_path):
         try:
             os.remove(avatar_path)
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
 
-    # Скидаємо шлях до дефолтного
-    default_avatar = "/static/Components/assets/empty_profile_logo.jpg"
+    default_avatar = "/static/Components/avatars/empty_profile_logo.jpg"
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -1313,7 +1609,6 @@ def change_email():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Перевірити, чи новий email вже існує
     cursor.execute("SELECT 1 FROM users WHERE email = %s", (new_email,))
     if cursor.fetchone():
         cursor.close()
@@ -1321,17 +1616,14 @@ def change_email():
         return jsonify({'success': False, 'error': 'Email už existuje'}), 400
 
     try:
-        # 1. Перейменування таблиць
         tables = ["", "_inventury", "_inventury_polozky", "_kategorie_skladovych_kariet", "_naskladnenie", "_naskladnenie_polozky", "_profile"]
         for suffix in tables:
             cursor.execute(f"ALTER TABLE {old_table}{suffix} RENAME TO {new_table}{suffix};")
 
-        # 2. Оновлення users
         cursor.execute("""
             UPDATE users SET email = %s, table_name = %s WHERE email = %s
         """, (new_email, new_table, old_email))
 
-        # 3. Оновлення профілю
         cursor.execute(f"""
             SELECT first_name, username, avatar_path FROM {new_table}_profile WHERE email = %s
         """, (old_email,))
@@ -1348,7 +1640,6 @@ def change_email():
                 WHERE email = %s
             """, (new_email, new_first, new_username, new_avatar_path, old_email))
 
-            # Перейменувати файл аватарки (якщо існує)
             old_path = os.path.join("static", "Components", "avatars", f"{old_table}.jpg")
             new_path = os.path.join("static", "Components", "avatars", f"{new_table}.jpg")
             if os.path.exists(old_path):
@@ -1356,7 +1647,6 @@ def change_email():
 
         conn.commit()
 
-        # Оновлюємо сесію
         session['user']['email'] = new_email
         session['user']['table_name'] = new_table
 
@@ -1393,13 +1683,11 @@ def change_password():
     if new_password != repeat_password:
         return jsonify({'success': False, 'error': 'Nové heslá sa nezhodujú'}), 400
 
-    # Хешуємо старий пароль
     h = hashlib.new("SHA256")
     old_salted = old_password + table_name + old_password + (table_name + 'salthash')
     h.update(old_salted.encode())
     old_hashed = h.hexdigest()
 
-    # Перевіряємо, чи старий пароль правильний
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT password FROM users WHERE email = %s", (email,))
@@ -1410,13 +1698,11 @@ def change_password():
         conn.close()
         return jsonify({'success': False, 'error': 'Nesprávne staré heslo'}), 400
 
-    # Хешуємо новий пароль
     h = hashlib.new("SHA256")
     new_salted = new_password + table_name + new_password + (table_name + 'salthash')
     h.update(new_salted.encode())
     new_hashed = h.hexdigest()
 
-    # Зберігаємо новий пароль
     cursor.execute("UPDATE users SET password = %s WHERE email = %s", (new_hashed, email))
     conn.commit()
     cursor.close()

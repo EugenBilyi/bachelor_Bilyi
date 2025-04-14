@@ -1,6 +1,6 @@
 const { useEffect, useState } = React;
 
-function App() {
+function OpravitSkladovaKarta({ onClose, productNameToEdit }) {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [units, setUnits] = useState([]);
@@ -53,8 +53,7 @@ function App() {
     
         const loadData = async () => {
             try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const productNameParam = urlParams.get('product_name');
+                const productNameParam = productNameToEdit;
     
                 const [categoriesData, itemsData] = await Promise.all([
                     fetchWithRetry('/categories_api'),
@@ -150,7 +149,7 @@ function App() {
         .then(result => {
             if (result.success) {
                 alert("Skladová karta bola úspešne aktualizovaná.");
-                window.close();
+                onClose();
             } else {
                 alert("Chyba pri aktualizácii skladovej karty: " + result.error);
             }
@@ -180,89 +179,91 @@ function App() {
     }
 
     return (
-        <div>
-            <header>
-                <div>
-                    <img src="/static/Components/assets/head_icon.png" />
-                    <h2>Upraviť skladovú kartu</h2>
-                </div>
-            </header>
-
-            {product ? (
-                <div className="columns-container">
-                    <div className="column">
-                        <p>Názov karty</p>
-                        <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} />
-
-                        <p>Kategória</p>
-                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                            {categories.map(category => (
-                                <option key={category} value={category}>{category}</option>
-                            ))}
-                        </select>
-
-                        <p>Počet</p>
-                        <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+        <div className="osk-modal-overlay">
+            <div className="osk-modal-content">
+                {/* <header>
+                    <div>
+                        <img src="/static/Components/assets/head_icon.png" />
+                        <h2>Upraviť skladovú kartu</h2>
                     </div>
+                </header> */}
 
-                    <div className="column">
-                        <p>Sadzba DPH</p>
-                        <select value={dphRate} onChange={(e) => setDphRate(e.target.value)}>
-                            <option value="0">Vyberte DPH</option>
-                            <option value="5">5%</option>
-                            <option value="19">19%</option>
-                            <option value="20">20%</option>
-                            <option value="23">23%</option>
-                        </select>
+                {product ? (
+                    <div className="osk-columns-container">
+                        <div className="osk-column">
+                            <p>Názov karty</p>
+                            <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} />
 
-                        <p>Jednotka</p>
-                        <select className="selectUnit" value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)}>
-                            <option value="">Vyberte jednotku</option>
-                            <option value="ks">ks</option>
-                            <option value="l">l</option>
-                            <option value="dl">dl</option>
-                            <option value="cl">cl</option>
-                            <option value="ml">ml</option>
-                            <option value="kg">kg</option>
-                            <option value="g">g</option>
-                            <option value="cm">cm</option>
-                            <option value="m">m</option>
-                        </select>
+                            <p>Kategória</p>
+                            <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                                {categories.map(category => (
+                                    <option key={category} value={category}>{category}</option>
+                                ))}
+                            </select>
 
-                        <div className="priceBlock">
-                            <div className="priceInput">
-                                <p>Cena s DPH</p>
-                                <div className="blockInput">
-                                    <input type="text" value={priceWithDph} onChange={handlePriceWithDphChange} />
-                                    <span>€</span>
+                            <p>Počet</p>
+                            <input type="text" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+                        </div>
+
+                        <div className="osk-column">
+                            <p>Sadzba DPH</p>
+                            <select value={dphRate} onChange={(e) => setDphRate(e.target.value)}>
+                                <option value="0">Vyberte DPH</option>
+                                <option value="5">5%</option>
+                                <option value="19">19%</option>
+                                <option value="20">20%</option>
+                                <option value="23">23%</option>
+                            </select>
+
+                            <p>Jednotka</p>
+                            <select className="osk-selectUnit" value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)}>
+                                <option value="">Vyberte jednotku</option>
+                                <option value="ks">ks</option>
+                                <option value="l">l</option>
+                                <option value="dl">dl</option>
+                                <option value="cl">cl</option>
+                                <option value="ml">ml</option>
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="cm">cm</option>
+                                <option value="m">m</option>
+                            </select>
+
+                            <div className="osk-priceBlock">
+                                <div className="osk-priceInput">
+                                    <p>Cena s DPH</p>
+                                    <div className="osk-blockInput">
+                                        <input type="text" value={priceWithDph} onChange={handlePriceWithDphChange} />
+                                        <span>€</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="priceInput">
-                                <p>Cena bez DPH</p>
-                                <div className="blockInput">
-                                    <input type="text" value={priceWithoutDph} onChange={handlePriceWithoutDphChange} />
-                                    <span>€</span>
+                                <div className="osk-priceInput">
+                                    <p>Cena bez DPH</p>
+                                    <div className="osk-blockInput">
+                                        <input type="text" value={priceWithoutDph} onChange={handlePriceWithoutDphChange} />
+                                        <span>€</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            ) : (
-                <p className="error-message">{errorMessage}</p>
-            )}
+                ) : (
+                    <p className="osk-error-message">{errorMessage}</p>
+                )}
 
-            <footer>
-                <div className="closeButton" onClick={() => window.close()}>
-                    <i className="fa-solid fa-xmark"></i>
-                    <span>Zrušiť</span>
+                <div className="osk-footer">
+                    <div className="osk-closeButton" onClick={onClose}>
+                        <i className="fa-solid fa-xmark"></i>
+                        <span>Zrušiť</span>
+                    </div>
+                    <div className="osk-acceptButton" onClick={handleSave}>
+                        <i className="fa-solid fa-check"></i>
+                        <span>Uložiť</span>
+                    </div>
                 </div>
-                <div className="acceptButton" onClick={handleSave}>
-                    <i className="fa-solid fa-check"></i>
-                    <span>Uložiť</span>
-                </div>
-            </footer>
+            </div>
         </div>
     );
 }
 
-ReactDOM.render(<App />, document.getElementById('app'));
+window.OpravitSkladovaKarta = OpravitSkladovaKarta;

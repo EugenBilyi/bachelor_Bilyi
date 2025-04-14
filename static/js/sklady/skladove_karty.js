@@ -59,7 +59,10 @@ function App() {
     const [items, setItems] = useState([]);
 
     const [errorMessage, setErrorMessage] = useState('');
-
+    const [isNovaKartaOpen, setIsNovaKartaOpen] = useState(false);
+    const [isOpravitKartaOpen, setIsOpravitKartaOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [isPredajModalOpen, setIsPredajModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [profile, setProfile] = useState({
@@ -67,7 +70,7 @@ function App() {
         last_name: '',
         username: '',
         email: '',
-        avatar_path: '/static/Components/assets/empty_profile_logo.jpg'
+        avatar_path: '/static/Components/avatars/empty_profile_logo.jpg'
     });
 
     const fetchWithRetry = async (url, attempts = 3) => {
@@ -369,16 +372,25 @@ function App() {
 
                 <nav>
                     <ul>
-                        <li><a href = "#">ÚČTY</a></li>
+                        <li onClick={() => setIsPredajModalOpen(true)}><a href="#">Simulácia predaja</a></li>
+                        <li><a href = "/uctenky">ÚČTY</a>
+                            <ul>
+                                <li><a href="/uctenky">Účtenky</a></li>
+                            </ul>
+                        </li>
                         <li className = 'sklady'><a href = "/skladove_karty">SKLADY</a>
                             <ul>
-                                <li className="current"><a href = "/skladove_karty">Skladové karty</a></li>
+                                <li><a href = "/skladove_karty">Skladové karty</a></li>
                                 <li><a href = "/categories">Kategórie skladových kariet</a></li>
                                 <li><a href = "/naskladnenie">Naskladnenie</a></li>
                                 <li><a href = "/inventury">Inventúry</a></li>
                             </ul>
                         </li>
-                        <li><a href = "#">FAKTURÁCIE</a></li>
+                        <li><a href = "/faktury">FAKTURÁCIE</a>
+                            <ul>
+                                <li><a href="/faktury">Faktúry</a></li>
+                            </ul>
+                        </li>
                         <li className="user-menu">
                             <a href="/profile">
                                 <img src={profile.avatar_path} alt="avatar" />
@@ -392,6 +404,10 @@ function App() {
                         </li>
                     </ul>
                 </nav>
+                <PredajModal
+                    isOpen={isPredajModalOpen}
+                    onClose={() => setIsPredajModalOpen(false)}
+                />
             </header>
             <div>
                 <div className="sideBar">
@@ -404,10 +420,13 @@ function App() {
                 </div>
                 <div className="pageName">
                     <p>Skladové karty</p>
-                    <button onClick={() => window.open('/nova_skladova_karta', '_blank', 'width=800, height=580, resizable=no')}>
+                    <button onClick={() => setIsNovaKartaOpen(true)}>
                         <i className="fa-solid fa-plus"></i>Nová skladová karta
                     </button>
                 </div>
+                {isNovaKartaOpen && (
+                    <NovaSkladovaKarta onClose={() => setIsNovaKartaOpen(false)} />
+                )}
             </div>
             <div className="mainPlace">
                 <div className="tableCategories">
@@ -420,7 +439,6 @@ function App() {
                             </td>
                         </tr>
                         <tr>
-                            {/* <td className="col1" rowspan="2"><input className="checkboxInput" type="checkbox"></input></td> */}
                             <td className="col1">
                                 <div className="nameCol"><p onClick={toggleArrowDirection}>Nazov<i className={arrowDirection ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'}></i></p></div>
                             </td>
@@ -488,7 +506,6 @@ function App() {
 
                         {items.map(item => (
                             <tr key={item.id} className="tableBlock">
-                                {/* <td><input className="checkboxInput" type="checkbox"></input></td> */}
                                 <td className = "product">{item.product_name}</td>
                                 <td>{item.category}</td>
                                 <td>{item.quantity}</td>
@@ -496,16 +513,25 @@ function App() {
                                 <td>{item.cenaDPH}<a>€</a></td>
                                 <td>{item.DPH}</td>
                                 <td>
+                                    <i className="fa-solid fa-pencil" 
+                                        onClick={() => {
+                                            setEditingProduct(item.product_name);
+                                            setIsOpravitKartaOpen(true);
+                                        }}>
+                                    </i>
                                     <i className="fa-solid fa-trash-can"  onClick={() => handleDeleteItem(item.product_name)}></i>
-                                    <i className="fa-solid fa-pencil" onClick={() => window.open(`/opravit_skladova_karta?product_name=${encodeURIComponent(item.product_name)}`, 
-                                        '_blank', 'width=800, height=580, resizable=no')}></i>
-                                    <i className="fa-solid fa-circle-info"></i>
                                 </td>
                             </tr>
                         ))}
                     </table>
                 </div>
             </div>
+            {isOpravitKartaOpen && (
+                <OpravitSkladovaKarta 
+                    productNameToEdit={editingProduct}
+                    onClose={() => setIsOpravitKartaOpen(false)} 
+                />
+            )}
         </div>
     )
 }

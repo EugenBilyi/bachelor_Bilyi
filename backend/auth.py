@@ -1,7 +1,5 @@
-# from flask import jsonify
 from backend.db import get_db_connection
 from backend.db_create import create_tables
-# from werkzeug.security import generate_password_hash, check_password_hash
 
 
 def authorize_user(email, password):

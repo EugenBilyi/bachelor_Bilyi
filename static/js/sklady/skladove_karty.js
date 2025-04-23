@@ -60,7 +60,7 @@ function App() {
 
     const [errorMessage, setErrorMessage] = useState('');
     const [isNovaKartaOpen, setIsNovaKartaOpen] = useState(false);
-    const [isOpravitKartaOpen, setIsOpravitKartaOpen] = useState(false);
+    const [isUpravitKartaOpen, setIsUpravitKartaOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [isPredajModalOpen, setIsPredajModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -516,7 +516,7 @@ function App() {
                                     <i className="fa-solid fa-pencil" 
                                         onClick={() => {
                                             setEditingProduct(item.product_name);
-                                            setIsOpravitKartaOpen(true);
+                                            setIsUpravitKartaOpen(true);
                                         }}>
                                     </i>
                                     <i className="fa-solid fa-trash-can"  onClick={() => handleDeleteItem(item.product_name)}></i>
@@ -526,10 +526,10 @@ function App() {
                     </table>
                 </div>
             </div>
-            {isOpravitKartaOpen && (
-                <OpravitSkladovaKarta 
+            {isUpravitKartaOpen && (
+                <UpravitSkladovaKarta 
                     productNameToEdit={editingProduct}
-                    onClose={() => setIsOpravitKartaOpen(false)} 
+                    onClose={() => setIsUpravitKartaOpen(false)} 
                 />
             )}
         </div>

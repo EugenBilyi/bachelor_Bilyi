@@ -495,7 +495,7 @@ function App(){
                                             <>
                                                 <i className="fa-solid fa-pencil" 
                                                     onClick={() => {localStorage.setItem("naskladnenie_id", item.id);
-                                                    window.location.href = "/opravitNaskladnenie";}}>
+                                                    window.location.href = "/upravitNaskladnenie";}}>
                                                 </i>
                                                 <i className="fa-solid fa-xmark" onClick={() => handleDeleteNaskladnenie(item.id)}></i>
                                             </>

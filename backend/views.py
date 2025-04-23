@@ -48,9 +48,9 @@ def categories():
 def novaSkladovaKarta():
     return render_template('novaSkladovaKarta.html')
 
-@app.route('/opravit_skladova_karta')
-def opravitSkladovaKarta():
-    return render_template('opravitSkladovaKarta.html')
+@app.route('/upravit_skladova_karta')
+def upravitSkladovaKarta():
+    return render_template('upravitSkladovaKarta.html')
 
 @app.route('/naskladnenie')
 def naskladnenie():
@@ -60,9 +60,9 @@ def naskladnenie():
 def noveNaskladnenie():
     return render_template('noveNaskladnenie.html')
 
-@app.route('/opravitNaskladnenie')
-def opravitNaskladnenie():
-    return render_template('opravitNaskladnenie.html')
+@app.route('/upravitNaskladnenie')
+def upravitNaskladnenie():
+    return render_template('upravitNaskladnenie.html')
 
 @app.route('/inventury')
 def inventury():
@@ -72,9 +72,9 @@ def inventury():
 def novaInventura():
     return render_template('novaInventura.html')
 
-@app.route('/opravitInventura')
-def opravitInventura():
-    return render_template('opravitInventura.html')
+@app.route('/upravitInventura')
+def upravitInventura():
+    return render_template('upravitInventura.html')
 
 @app.route('/infoInventura')
 def infoInventura():

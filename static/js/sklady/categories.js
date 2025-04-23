@@ -128,13 +128,21 @@ function App() {
     const handleAddCategory = () => {
         const userData = localStorage.getItem('user');
         const user = userData ? JSON.parse(userData) : null;
-
-        if (!user || !newCategory.trim()) {
-            setErrorMessage('Category name cannot be empty');
+    
+        const trimmedCategory = newCategory.trim().toLowerCase();
+    
+        if (!user || !trimmedCategory) {
+            setErrorMessage('Názov kategórie nemôže byť prázdny');
             return;
         }
-
-        fetch('http://127.0.0.1:5000/add_category', {
+    
+        const exists = items.some(item => item.category.toLowerCase() === trimmedCategory);
+        if (exists) {
+            alert('Táto kategória už existuje.');
+            return;
+        }
+    
+        fetch('/add_category', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -145,18 +153,18 @@ function App() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                setItems([...items, { category: newCategory }]); // Обновление списка категорий
-                setNewCategory(''); // Очиcтка input
+                setItems([...items, { category: newCategory.trim() }]); // Додати нову категорію
+                setNewCategory('');
                 setErrorMessage('');
             } else {
-                setErrorMessage(data.error || 'An error occurred');
+                setErrorMessage(data.error || 'Došlo k chybe');
             }
         })
         .catch(error => {
-            setErrorMessage('Error adding category');
+            setErrorMessage('Chyba pri pridávaní kategórie');
             console.error(error);
         });
-    };
+    };    
 
     const handleDeleteCategory = (category) => {
         const userData = localStorage.getItem('user');
@@ -167,7 +175,7 @@ function App() {
             return;
         }
     
-        fetch('http://127.0.0.1:5000/delete_category', {
+        fetch('/delete_category', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -199,7 +207,7 @@ function App() {
             return;
         }
     
-        fetch('http://127.0.0.1:5000/export_categories_csv', {
+        fetch('/export_categories_csv', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${user.email}`

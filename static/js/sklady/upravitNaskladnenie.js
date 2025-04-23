@@ -452,7 +452,7 @@ function App() {
                 <div className="pageName">
                     <div>
                         <i className="fa-solid fa-arrow-left" onClick={() => window.location.href = '/naskladnenie'}></i>
-                        <p>Opraviť naskladnenie</p>
+                        <p>Upraviť naskladnenie</p>
                     </div>
                 </div>
                 <div className="mainPlace">

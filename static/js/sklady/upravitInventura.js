@@ -443,7 +443,7 @@ function App() {
                 <div className="pageName">
                     <div>
                         <i className="fa-solid fa-arrow-left" onClick={() => window.location.href = '/inventury'}></i>
-                        <p>Oprava inventúry</p>
+                        <p>Uprava inventúry</p>
                     </div>
                 </div>
                 <div className="mainPlace">

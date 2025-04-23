@@ -354,7 +354,7 @@ function App(){
                                     <td className="col4">
                                         <i className="fa-solid fa-pencil" 
                                             onClick={() => {localStorage.setItem("inventura_id", item.id);
-                                            window.location.href = "/opravitInventura";}}>
+                                            window.location.href = "/upravitInventura";}}>
                                         </i>
                                         <i className="fa-solid fa-circle-info" 
                                             onClick={() => {localStorage.setItem("inventura_id", item.id);

@@ -1,6 +1,6 @@
 const { useEffect, useState } = React;
 
-function OpravitSkladovaKarta({ onClose, productNameToEdit }) {
+function upravitSkladovaKarta({ onClose, productNameToEdit }) {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [units, setUnits] = useState([]);
@@ -181,13 +181,6 @@ function OpravitSkladovaKarta({ onClose, productNameToEdit }) {
     return (
         <div className="osk-modal-overlay">
             <div className="osk-modal-content">
-                {/* <header>
-                    <div>
-                        <img src="/static/Components/assets/head_icon.png" />
-                        <h2>Upraviť skladovú kartu</h2>
-                    </div>
-                </header> */}
-
                 {product ? (
                     <div className="osk-columns-container">
                         <div className="osk-column">
@@ -266,4 +259,4 @@ function OpravitSkladovaKarta({ onClose, productNameToEdit }) {
     );
 }
 
-window.OpravitSkladovaKarta = OpravitSkladovaKarta;
+window.upravitSkladovaKarta = upravitSkladovaKarta;

@@ -132,7 +132,7 @@ function App() {
         const trimmedCategory = newCategory.trim().toLowerCase();
     
         if (!user || !trimmedCategory) {
-            setErrorMessage('Názov kategórie nemôže byť prázdny');
+            alert('Názov kategórie nemôže byť prázdny');
             return;
         }
     
@@ -332,7 +332,6 @@ function App() {
                     <input type='text'name='text' value={newCategory} onChange={(e) => setNewCategory(e.target.value)}/>
                     <button type='button' onClick={handleAddCategory}>Pridať</button>
                 </div>
-                <p style={{ color: 'red' }}>{errorMessage}</p>
                 <div className="tableCategories">
                     <ul className="headerUl">
                         <li><button onClick={handleExportCSV}>Export do .csv</button></li>

@@ -1,6 +1,6 @@
 const { useEffect, useState } = React;
 
-function upravitSkladovaKarta({ onClose, productNameToEdit }) {
+function UpravitSkladovaKarta({ onClose, productNameToEdit }) {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [units, setUnits] = useState([]);
@@ -259,4 +259,4 @@ function upravitSkladovaKarta({ onClose, productNameToEdit }) {
     );
 }
 
-window.upravitSkladovaKarta = upravitSkladovaKarta;
+window.UpravitSkladovaKarta = UpravitSkladovaKarta;

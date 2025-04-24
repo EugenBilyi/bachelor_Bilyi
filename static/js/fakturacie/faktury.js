@@ -112,6 +112,32 @@ function App() {
         }
     };    
 
+    const handleExportCSV = () => {
+        if (!faktury.length) {
+            alert('Nie sú dostupné žiadne údaje na export.');
+            return;
+        }
+    
+        const headers = ["Číslo", "Dátum vystavenia", "Cena", "Dátum splatnosti", "Stav"];
+        const rows = faktury.map(faktura => [
+            faktura.cislo,
+            new Date(faktura.datum_vystavenia).toLocaleDateString('sk-SK'),
+            `${faktura.cena.toFixed(2)} €`,
+            new Date(faktura.datum_splatnosti).toLocaleDateString('sk-SK'),
+            faktura.stav === "Zaplatena"
+                ? (faktura.po_splatnosti ? "Zaplatená (po splatnosti)" : "Zaplatená")
+                : "Nezaplatená"
+        ]);
+    
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 10 }, { wch: 20 }, { wch: 20 }];
+    
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Faktúry');
+        XLSX.writeFile(wb, 'Faktury.xlsx');
+    };
+    
+
     const handleLogout = async () => {
         try {
             const res = await fetch("/logout", {
@@ -225,7 +251,7 @@ function App() {
                                 <tr>
                                     <td colSpan="5">
                                         <div className="buttonContainer">
-                                            <button>Export do .csv</button>
+                                            <button onClick={handleExportCSV}>Export do .csv</button>
                                         </div>
                                     </td>
                                 </tr>

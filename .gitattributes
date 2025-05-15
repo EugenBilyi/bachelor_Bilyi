@@ -1,0 +1,10 @@
+# Force languages for directories
+backend/* linguist-language=Python
+static/js/* linguist-language=JavaScript
+
+# We tell GitHub that files with these extensions are important code
+*.py linguist-detectable=true
+*.js linguist-detectable=true
+
+# Ignore node_modules - these are third-party libraries
+node_modules/* linguist-vendored

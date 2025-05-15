@@ -1,1 +1,0 @@
-Návšteva webovej stránky by sa mala začať na adrese http://127.0.0.1:5000/register_page.
